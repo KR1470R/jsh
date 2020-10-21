@@ -28,7 +28,17 @@ dependencies {
     testImplementation 'junit:junit:4.13'
 }
 
+mainClassName = 'kript.jsh.main.App'
+
 application {
     // Define the main class for the application.
-    mainClassName = 'kript.jsh.main.App'
+    mainClassName = mainClassName
+}
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': mainClassName
+        )
+    }
 }
