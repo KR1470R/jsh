@@ -5,8 +5,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Scanner;
 
 public class App {
@@ -19,20 +17,6 @@ public class App {
 
     public static boolean checkTheCommand(String command, String line) {
         return line.replaceAll(" ", "").startsWith(command);
-    }
-
-    public static List<String> tokenize(String command) {
-        List<String> tokens = Arrays.asList(command.split("[ \t]"));
-        int size = tokens.size();
-        for(int i = 0; i < size; i++) {
-            String token = tokens.get(i);
-            if(token.equals(" ") || token.equals("\t")) {
-                tokens.remove(i);
-                i--;
-                size--;
-            }
-        }
-        return tokens;
     }
 
     public static void main(String[] args) {
