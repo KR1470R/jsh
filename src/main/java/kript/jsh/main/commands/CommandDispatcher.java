@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.HashMap;
 import java.util.List;
+import kript.jsh.main.logger.Error;
 
 public class CommandDispatcher {
     private final HashMap<String, Method> commands = new HashMap<>();
@@ -29,14 +30,14 @@ public class CommandDispatcher {
 
     public void dispatch(List<String> argv) throws Exception {
         if(argv.size() < 1) {
-            throw new Exception("Empty command");
+          return;
         } else {
             String commandName = argv.get(0);
             Method handler = commands.get(commandName);
             if(handler == null) {
-                throw new Exception("Unknown command");
+              Error.notFoundCommand(commandName);
             } else {
-                handler.invoke(null, argv);
+              handler.invoke(null, argv);
             }
         }
     }
