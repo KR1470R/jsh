@@ -1,6 +1,6 @@
 package kript.jsh.main.syntax.parser.expressions;
 
-public class Expression implements IExpression {
+public class Expression {
     private final String string;
 
     public Expression(String _string) {

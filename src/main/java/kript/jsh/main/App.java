@@ -1,67 +1,43 @@
 package kript.jsh.main;
 
-import java.io.File;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import kript.jsh.main.commands.CommandDispatcher;
+import kript.jsh.main.commands.Commands;
+import kript.jsh.main.syntax.lexer.Lexer;
+
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Scanner;
 
 public class App {
-    @Retention(RetentionPolicy.RUNTIME)
-    public @interface Command {
-        String name();
-
-        String args();
-    }
+    public static final String fimilarPath = System.getProperty("user.dir");
+    public static String currentPath = fimilarPath;
 
     public static boolean checkTheCommand(String command, String line) {
         return line.replaceAll(" ", "").startsWith(command);
     }
 
+    @SuppressWarnings("InfiniteLoopStatement")
     public static void main(String[] args) {
         System.out.println("Welcome to JSh!");
         Scanner input = new Scanner(System.in);
-        String fimilarPath = System.getProperty("user.dir");
-        String currentPath = fimilarPath;
-        System.out.printf("%s $ ", fimilarPath);
+
+        CommandDispatcher dispatcher = new CommandDispatcher();
+        dispatcher.add(Commands.class);
+
         while (true) {
+            System.out.printf("%s $ ", fimilarPath);
             String question = input.nextLine();
-            if (checkTheCommand("ls", question)) {
-                try {
-                    Files.list(new File(currentPath).toPath())
-                            .forEach(path -> {
-                                String pathToString = path.toString();
-                                String getPath = pathToString.substring(pathToString.lastIndexOf("/"));
-                                if (Files.isDirectory(Paths.get(pathToString))) {
-                                    System.out.print(getPath.substring(1) + "/" + "  ");
-                                } else {
-                                    System.out.print(getPath.substring(1) + "  ");
-                                }
-                            });
-                    System.out.println();
-                } catch (Throwable err) {
-                    System.out.println(err);
-                }
-            } else if (checkTheCommand("cat", question)) {
-                String[] commandContent = question.split(" ");
-                try {
-                    if (Files.exists(Paths.get(currentPath + "/" + commandContent[1]))) {
-                        for (int i = 1; i < commandContent.length; i++) {
-                            File file = new File(commandContent[i]);
-                            Scanner reader = new Scanner(file);
-                            while (reader.hasNextLine()) {
-                                System.out.println(reader.nextLine());
-                            }
-                            reader.close();
-                        }
-                    } else {
-                        System.out.printf("cat: %s: No such file or directory%n", commandContent[1]);
-                    }
-                } catch (Throwable err) {
-                    System.out.println("cat: no have argument");
-                }
-            } else if (checkTheCommand("cd", question)) {
+
+            List<String> tokens = Lexer.tokenize(question);
+            try {
+                dispatcher.dispatch(tokens);
+                continue;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            if (checkTheCommand("cd", question)) {
                 String[] commandContent = question.split(" ");
                 try {
                     String[] commandPath = commandContent[1].split("/");
@@ -82,12 +58,9 @@ public class App {
                 } catch (Throwable err) {
                     currentPath = fimilarPath;
                 }
-            } else if (checkTheCommand("exit", question)) {
-                break;
             } else {
                 System.out.printf("jsh: command no found: %s\n", question);
             }
-            System.out.printf("%s $ ", currentPath);
         }
     }
 }
